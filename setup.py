@@ -22,4 +22,5 @@ setup(
     package_dir={'imbox': 'imbox'},
     zip_safe=False,
     install_requires=[],
+    test_suite='tests',
 )
