@@ -15,7 +15,7 @@ class Session(object):
     def logout(self):
         self.connection.logout()
 
-    def query_uids(self, **kwargs):
+    def _get_uids(self, **kwargs):
         query = build_search_query(**kwargs)
 
         message, data = self.connection.uid('search', None, query)
@@ -29,17 +29,11 @@ class Session(object):
 
         return email_object
 
-    def fetch_list(self, **kwargs):
-        uid_list = self.query_uids(**kwargs)
-
-        for uid in uid_list:
-            yield (uid, self.fetch_by_uid(uid))
-
     def mark_seen(self, uid):
         self.connection.uid('STORE', uid, '+FLAGS', '\\Seen')
 
     def delete(self, uid):
-        mov, data = self.connection.uid('STORE', uid, '+FLAGS', '(\\Deleted)')
+        self.connection.uid('STORE', uid, '+FLAGS', '(\\Deleted)')
         self.connection.expunge()
 
     def copy(self, uid, destination_folder):
@@ -49,10 +43,19 @@ class Session(object):
         if self.copy(uid, destination_folder):
             self.delete(uid)
 
-    def messages(self, *args, **kwargs):
-        folder = kwargs.get('folder', False)
+    def messages(self, unread=False, sent_from=False, sent_to=False,
+                 date__gt=False, date__lt=False, folder=False):
 
         if folder:
             self.connection.select(folder)
 
-        return self.fetch_list(**kwargs)
+        uids = self._get_uids(
+            unread=unread,
+            sent_from=sent_from,
+            sent_to=sent_to,
+            date__gt=date__gt,
+            date__lt=date__lt,
+        )
+
+        for uid in uids:
+            yield (uid, self.fetch_by_uid(uid))

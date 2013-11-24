@@ -1,13 +1,5 @@
-# TODO - Validate query arguments
-def build_search_query(**kwargs):
-
-    # Parse keyword arguments 
-    unread = kwargs.get('unread', False)
-    sent_from = kwargs.get('sent_from', False)
-    sent_to = kwargs.get('sent_to', False)
-    date__gt = kwargs.get('date__gt', False)
-    date__lt = kwargs.get('date__lt', False)
-
+def build_search_query(unread=False, sent_from=False, sent_to=False,
+                       date__gt=False, date__lt=False):
     query = "(ALL)"
 
     if unread != False:
